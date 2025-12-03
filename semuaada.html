@@ -1151,3 +1151,588 @@
                 </button>
             </nav>
         </div>
+    </header>
+
+    <section class="hero" id="beranda">
+        <div class="container">
+            <h1>Selamat Datang di SemuaAda</h1>
+            <p>Belanja mudah, lengkap, dan terpercaya - Semua ada di sini!</p>
+        </div>
+    </section>
+
+    <section class="gallery-section" id="galeri">
+        <div class="container">
+            <h2 class="section-title">Galeri Produk Kami</h2>
+
+            <div class="category-filters">
+                <button class="category-btn active" onclick="filterGallery('all')">Semua Produk</button>
+                <button class="category-btn" onclick="filterGallery('madu')">Madu</button>
+                <button class="category-btn" onclick="filterGallery('minuman')">Minuman</button>
+                <button class="category-btn" onclick="filterGallery('beras')">Beras</button>
+                <button class="category-btn" onclick="filterGallery('pertanian')">Pertanian</button>
+                <button class="category-btn" onclick="filterGallery('telur')">Telur</button>
+                <button class="category-btn" onclick="filterGallery('ikan')">Ikan</button>
+                <button class="category-btn" onclick="filterGallery('gula')">Gula</button>
+                <button class="category-btn" onclick="filterGallery('minyak goreng')">Minyak Goreng</button>
+                <button class="category-btn" onclick="filterGallery('sayuran')">Sayuran</button>
+                <button class="category-btn" onclick="filterGallery('daging')">Daging</button>
+                <button class="category-btn" onclick="filterGallery('olahan')">Olahan</button>
+                <button class="category-btn" onclick="filterGallery('lainlain')">Lain-lain</button>
+            </div>
+
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- Gallery items will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="tentang">
+        <div class="container">
+            <h2 class="section-title">Mengapa Memilih SemuaAda?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🏪</div>
+                    <h3>Produk Lengkap</h3>
+                    <p>Semua kebutuhan Anda tersedia di satu tempat dengan kualitas terbaik</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Harga Terjangkau</h3>
+                    <p>Harga yang bersahabat untuk semua kalangan dengan kualitas yang tidak diragukan</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚚</div>
+                    <h3>Pengiriman Mudah</h3>
+                    <p>Layanan pesan via WhatsApp yang cepat dan terpercaya untuk kemudahan berbelanja</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact" id="kontak">
+        <div class="container">
+            <h2 class="section-title">Kontak Kami</h2>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <h3>📍 Alamat</h3>
+                    <p>Jl. Raya Jogja - Wates KM 23</p>
+                    <p>Kalurahan Kedungsari, Kab. Kulon Progo</p>
+                </div>
+                <div class="contact-item">
+                    <h3>📞 Telepon</h3>
+                    <p>+62 812-9683-690</p>
+                    <p>+62 888-0617-4649</p>
+                </div>
+                <div class="contact-item">
+                    <h3>✉️ Email</h3>
+                    <p>semuaada@gmail.com</p>
+                    <p>info.semuaada@gmail.com</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 SemuaAda. Hak Cipta Dilindungi Undang-Undang.</p>
+        </div>
+    </footer>
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="cart-modal">
+        <div class="cart-modal-content">
+            <span class="close" onclick="closeCart()">&times;</span>
+            <h2>Keranjang Belanja 🛒</h2>
+            
+            <div class="admin-selection">
+                <h3>Pilih Admin untuk Pemesanan</h3>
+                <div class="admin-grid" id="adminGrid">
+                    <!-- Admin cards will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div id="cartItemsContainer"></div>
+            <div id="emptyCartMessage" class="empty-cart hidden">
+                <p>Keranjang Anda kosong. Yuk, belanja sekarang!</p>
+            </div>
+            <div class="cart-total">
+                <h3>Total Belanja:</h3>
+                <span id="cartTotalAmount" class="total-amount">Rp 0</span>
+            </div>
+            <div class="cart-actions">
+                <button class="cart-btn cart-btn-primary" onclick="checkout()">Checkout via WhatsApp</button>
+                <button class="cart-btn cart-btn-secondary" onclick="closeCart()">Lanjutkan Belanja</button>
+                <button class="cart-btn cart-btn-danger" onclick="clearCart()">Kosongkan Keranjang</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Gallery Modal -->
+    <div id="galleryModal" class="gallery-modal">
+        <div class="gallery-modal-content">
+            <span class="close" onclick="closeGallery()">&times;</span>
+            <div class="gallery-modal-header">
+                <h2 id="galleryTitle">Galeri Foto Produk</h2>
+                <p id="gallerySubtitle">Lihat foto-foto produk kami</p>
+            </div>
+            <div id="photoGalleryGrid" class="photo-gallery-grid"></div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
+    </div>
+
+    <script>
+        // Data admin WhatsApp
+        const adminList = [
+            {
+                id: 'admin-1',
+                name: 'Apti',
+                phone: '6281328267973',
+                status: 'Online',
+                role: 'Admin Penjualan'
+            },
+            {
+                id: 'admin-2',
+                name: 'Eko',
+                phone: '628129683690',
+                status: 'Online',
+                role: 'Admin Penjualan'
+            }
+        ];
+
+        // Data produk dengan deskripsi terstruktur dan link video
+        const productGallery = [
+            // Madu
+            {
+                id: 'madu-1',
+                category: 'madu',
+                title: 'Envella Madu Kita',
+                description: [
+                    'Madu Multiflora',
+                    'Madu Asli, Murni & Alami'
+                ],
+                price: 55000,
+                unit: 'botol',
+                image: 'images/madu/madu-envella-1.jpg',
+                fallbackEmoji: '🍯',
+                stock: 'available',
+                stockCount: 50,
+                isPromo: false,
+                isNew: true,
+                videoUrl: '',
+                hasVideo: false,
+                photos: [
+                    { url: 'images/madu/madu-envella-1.jpg', caption: 'Madu Multiflora' }
+                ]
+            },
+            {
+                id: 'madu-2',
+                category: 'madu',
+                title: 'Envella Madu Kita + Be Pollen',
+                description: [
+                    'Madu + butiran be pollen',
+                    'Madu Multiflora',
+                    'Madu Asli, Murni & Alami'
+                ],
+                price: 55000,
+                unit: 'botol',
+                image: 'images/madu/madu-envella-2.jpg',
+                fallbackEmoji: '🍯',
+                stock: 'available',
+                stockCount: 50,
+                isPromo: false,
+                isNew: true,
+                videoUrl: '',
+                hasVideo: false,
+                photos: [
+                    { url: 'images/madu/madu-envella-2.jpg', caption: 'Madu + Be Pollen' }
+                ]
+            }, 
+
+            // Minuman
+            {
+                id: 'minuman-1',
+                category: 'minuman',
+                title: 'Minuman Lidah Buaya',
+                description: [
+                    'Minuman olahan Lidah Buaya',
+                    'Minuman segar alami kaya manfaat'
+                ],
+                price: 10000,
+                unit: 'botol',
+                image: 'images/minuman/minuman-lidah_buaya.jpg',
+                fallbackEmoji: '🥤',
+                stock: 'available',
+                stockCount: 50,
+                isPromo: false,
+                isNew: true,
+                videoUrl: '',
+                hasVideo: false,
+                photos: [
+                    { url: 'images/minuman/minuman-lidah_buaya.jpg', caption: 'Minuman Lidah Buaya botol' }
+                ]
+            }
+        ];
+
+        // State management menggunakan memori JavaScript
+        let cart = [];
+        let selectedAdminPhone = adminList[0].phone;
+        
+        const cartCountDesktop = document.getElementById('cartCountDesktop');
+        const cartCountMobile = document.getElementById('cartCountMobile');
+        const cartItemsContainer = document.getElementById('cartItemsContainer');
+        const cartTotalAmount = document.getElementById('cartTotalAmount');
+        const emptyCartMessage = document.getElementById('emptyCartMessage');
+        const cartModal = document.getElementById('cartModal');
+        const notification = document.getElementById('notification');
+        const galleryModal = document.getElementById('galleryModal');
+
+        function updateCartCount() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCountDesktop.innerText = totalItems;
+            cartCountMobile.innerText = totalItems;
+        }
+
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { 
+                style: 'currency', 
+                currency: 'IDR', 
+                minimumFractionDigits: 0 
+            }).format(number);
+        }
+
+        function showNotification(message, isError = false) {
+            const notificationText = document.getElementById('notificationText');
+            notificationText.innerText = message;
+            notification.className = `notification ${isError ? 'error' : ''} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function getBadges(product) {
+            let badges = '';
+            
+            if (product.stockCount === 0 || product.stock === 'out') {
+                badges += '<div class="badge stock-badge stock-out">Habis</div>';
+            } else if (product.stockCount <= 10 || product.stock === 'low') {
+                badges += '<div class="badge stock-badge stock-low">Stok Terbatas</div>';
+            } else {
+                badges += '<div class="badge stock-badge stock-available">Tersedia</div>';
+            }
+            
+            if (product.isPromo) {
+                badges += '<div class="badge promo-badge">PROMO</div>';
+            }
+            
+            if (product.isNew) {
+                badges += '<div class="badge new-badge">BARU</div>';
+            }
+            
+            return badges;
+        }
+        
+        function openGallery(productId) {
+            const product = productGallery.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('galleryTitle').innerText = `Galeri Foto - ${product.title}`;
+            document.getElementById('gallerySubtitle').innerText = `${product.category.toUpperCase()} | ${formatRupiah(product.price)}/${product.unit}`;
+            
+            const photoGalleryGrid = document.getElementById('photoGalleryGrid');
+            photoGalleryGrid.innerHTML = '';
+            
+            const photos = product.photos || [];
+            
+            if (photos.length === 0) {
+                photoGalleryGrid.innerHTML = '<div class="gallery-empty"><div class="gallery-empty-icon">📷</div><p>Belum ada foto galeri untuk produk ini</p></div>';
+            } else {
+                photos.forEach((photo, index) => {
+                    const photoItem = document.createElement('div');
+                    photoItem.className = 'photo-gallery-item';
+                    photoItem.innerHTML = `
+                        <img src="${photo.url}" alt="${product.title} - Foto ${index + 1}" 
+                             onerror="this.parentElement.innerHTML='<div style=\\'padding: 80px 20px; text-align: center; color: #999; background: #f8f9fa;\\'>📷<br>Foto tidak tersedia</div>'">
+                        <div class="photo-gallery-item-info">
+                            <h4>Foto ${index + 1}</h4>
+                            <p>${photo.caption}</p>
+                        </div>
+                    `;
+                    photoGalleryGrid.appendChild(photoItem);
+                });
+            }
+            galleryModal.style.display = 'block';
+        }
+
+        function closeGallery() {
+            galleryModal.style.display = 'none';
+        }
+
+        function changeQuantity(productId, change) {
+            const quantityInput = document.getElementById(`quantity-${productId}`);
+            let currentQuantity = parseInt(quantityInput.value);
+            const product = productGallery.find(p => p.id === productId);
+            
+            currentQuantity += change;
+            if (currentQuantity < 1) {
+                currentQuantity = 1;
+            }
+            if (currentQuantity > product.stockCount) {
+                currentQuantity = product.stockCount;
+                showNotification(`Stok ${product.title} hanya tersisa ${product.stockCount}`, true);
+            }
+            quantityInput.value = currentQuantity;
+        }
+
+        function addToCart(productId) {
+            const product = productGallery.find(p => p.id === productId);
+            const quantityInput = document.getElementById(`quantity-${productId}`);
+            const quantity = parseInt(quantityInput.value);
+            
+            if (product.stockCount === 0) {
+                showNotification('Produk ini sedang habis', true);
+                return;
+            }
+            
+            if (quantity > product.stockCount) {
+                showNotification(`Stok ${product.title} hanya tersisa ${product.stockCount}`, true);
+                return;
+            }
+            
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                const newQuantity = existingItem.quantity + quantity;
+                if (newQuantity > product.stockCount) {
+                    showNotification(`Total tidak boleh melebihi stok yang tersedia (${product.stockCount})`, true);
+                    return;
+                }
+                existingItem.quantity = newQuantity;
+            } else {
+                cart.push({
+                    id: productId,
+                    title: product.title,
+                    price: product.price,
+                    unit: product.unit,
+                    quantity: quantity,
+                    image: product.image,
+                    fallbackEmoji: product.fallbackEmoji
+                });
+            }
+            
+            updateCartCount();
+            showNotification(`${quantity} ${product.unit} ${product.title} ditambahkan ke keranjang!`);
+            quantityInput.value = 1;
+            
+            trackAddToCart(product.title, product.category, product.price, quantity);
+        }
+
+        function renderAdminSelection() {
+            const adminGrid = document.getElementById('adminGrid');
+            adminGrid.innerHTML = '';
+            adminList.forEach(admin => {
+                const adminCard = document.createElement('div');
+                adminCard.className = `admin-card ${selectedAdminPhone === admin.phone ? 'selected' : ''}`;
+                adminCard.onclick = () => selectAdmin(admin.phone);
+                adminCard.innerHTML = `
+                    <div class="admin-name">${admin.name}</div>
+                    <div class="admin-phone">${admin.role}</div>
+                    <div class="admin-status">${admin.status}</div>
+                `;
+                adminGrid.appendChild(adminCard);
+            });
+        }
+
+        function selectAdmin(phone) {
+            selectedAdminPhone = phone;
+            renderAdminSelection();
+        }
+
+        function renderGallery(filter = 'all') {
+            const galleryGrid = document.getElementById('galleryGrid');
+            galleryGrid.innerHTML = '';
+            
+            const filteredProducts = filter === 'all' 
+                ? productGallery 
+                : productGallery.filter(product => product.category === filter);
+            
+            if (filter !== 'all') {
+                trackCategoryFilter(filter);
+            }
+            
+            filteredProducts.forEach(product => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.dataset.category = product.category;
+                
+                const isOutOfStock = product.stockCount === 0;
+                
+                const descriptionHtml = `
+                    <ul class="description-list">
+                        ${product.description.map(desc => `<li>${desc}</li>`).join('')}
+                    </ul>
+                `;
+                
+                galleryItem.innerHTML = `
+                    <div class="gallery-item-image">
+                        <img src="${product.image}" alt="${product.title}" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="product-image-placeholder" style="display: none; font-size: 4rem; color: #adb5bd; display: flex; align-items: center; justify-content: center; height: 100%;">${product.fallbackEmoji}</div>
+                        <div class="badges-container">${getBadges(product)}</div>
+                        <button class="photo-gallery-btn" onclick="openGallery('${product.id}')" title="Lihat Galeri Foto">📷</button>
+                    </div>
+                    <div class="gallery-item-content">
+                        <div class="item-category">${product.category}</div>
+                        <h3 class="item-title">${product.title}</h3>
+                        <div class="item-description">
+                            ${descriptionHtml}
+                        </div>
+                        <div class="item-price">${formatRupiah(product.price)}/${product.unit}</div>
+                        <div class="quantity-selector">
+                            <span class="quantity-label">Jumlah:</span>
+                            <div class="quantity-controls">
+                                <button class="quantity-btn" onclick="changeQuantity('${product.id}', -1)" ${isOutOfStock ? 'disabled' : ''}>-</button>
+                                <input type="number" id="quantity-${product.id}" value="1" min="1" max="${product.stockCount}" class="quantity-input" ${isOutOfStock ? 'disabled' : ''}>
+                                <button class="quantity-btn" onclick="changeQuantity('${product.id}', 1)" ${isOutOfStock ? 'disabled' : ''}>+</button>
+                            </div>
+                        </div>
+                        <button class="add-to-cart-btn" onclick="addToCart('${product.id}')" ${isOutOfStock ? 'disabled' : ''}>
+                            ${isOutOfStock ? '⌚ Habis' : '🛒 Tambah ke Keranjang'}
+                        </button>
+                    </div>
+                `;
+                
+                galleryGrid.appendChild(galleryItem);
+            });
+        }
+
+        function filterGallery(category) {
+            renderGallery(category);
+            
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.category-btn[onclick="filterGallery('${category}')"]`).classList.add('active');
+        }
+
+        function renderCartItems() {
+            cartItemsContainer.innerHTML = '';
+            let total = 0;
+            
+            if (cart.length === 0) {
+                emptyCartMessage.classList.remove('hidden');
+                document.querySelector('.cart-total').classList.add('hidden');
+            } else {
+                emptyCartMessage.classList.add('hidden');
+                document.querySelector('.cart-total').classList.remove('hidden');
+                
+                cart.forEach((item, index) => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    const itemDiv = document.createElement('div');
+                    itemDiv.classList.add('cart-item');
+                    itemDiv.innerHTML = `
+                        <div class="cart-item-info">
+                            <div class="cart-item-title">${item.title}</div>
+                            <div class="cart-item-details">${formatRupiah(item.price)}/${item.unit}</div>
+                            <div class="cart-item-quantity">
+                                <button class="cart-quantity-btn" onclick="updateCartItemQuantity(${index}, -1)">-</button>
+                                <span>${item.quantity} ${item.unit}</span>
+                                <button class="cart-quantity-btn" onclick="updateCartItemQuantity(${index}, 1)">+</button>
+                            </div>
+                        </div>
+                        <span class="cart-item-price">${formatRupiah(itemTotal)}</span>
+                        <button class="cart-item-remove" onclick="removeCartItem(${index})">Hapus</button>
+                    `;
+                    cartItemsContainer.appendChild(itemDiv);
+                });
+            }
+            cartTotalAmount.innerText = formatRupiah(total);
+        }
+
+        function updateCartItemQuantity(index, change) {
+            const item = cart[index];
+            const product = productGallery.find(p => p.id === item.id);
+            
+            item.quantity += change;
+            if (item.quantity <= 0) {
+                removeCartItem(index);
+            } else if (item.quantity > product.stockCount) {
+                item.quantity = product.stockCount;
+                showNotification(`Stok ${product.title} hanya tersisa ${product.stockCount}`, true);
+                renderCartItems();
+                updateCartCount();
+            } else {
+                renderCartItems();
+                updateCartCount();
+            }
+        }
+
+        function removeCartItem(index) {
+            cart.splice(index, 1);
+            renderCartItems();
+            updateCartCount();
+        }
+
+        function openCart() {
+            renderCartItems();
+            renderAdminSelection();
+            cartModal.style.display = 'block';
+        }
+
+        function closeCart() {
+            cartModal.style.display = 'none';
+        }
+
+        function clearCart() {
+            cart = [];
+            renderCartItems();
+            updateCartCount();
+            showNotification('Keranjang belanja berhasil dikosongkan.');
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                showNotification('Keranjang Anda kosong. Tambahkan produk untuk checkout.', true);
+                return;
+            }
+
+            const selectedAdmin = adminList.find(admin => admin.phone === selectedAdminPhone);
+            let message = `Halo ${selectedAdmin.name}, saya ingin memesan produk berikut dari *SemuaAda*:\n\n`;
+            let total = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                message += `- ${item.quantity} ${item.unit} ${item.title} - ${formatRupiah(itemTotal)}\n`;
+            });
+
+            message += `\n*Total Belanja: ${formatRupiah(total)}*`;
+            message += `\n\nNama: [Isi nama Anda]\nAlamat: [Isi alamat Anda]\nCatatan: [Isi catatan tambahan jika ada]`;
+
+            const whatsappUrl = `https://wa.me/${selectedAdminPhone}?text=${encodeURIComponent(message)}`;
+            
+            trackCheckout(total, cart.length);
+            
+            window.open(whatsappUrl, '_blank');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartCount();
+            renderGallery();
+        });
+
+        window.onclick = function(event) {
+            if (event.target === cartModal) {
+                closeCart();
+            }
+            if (event.target === galleryModal) {
+                closeGallery();
+            }
+        }
+    </script>
+
+</body>
+</html>
