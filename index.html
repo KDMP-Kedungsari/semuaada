@@ -3,58 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Storefront - Toko Saya</title>
+    <title>Storefront Toko Kedungsari</title>
     <style>
-        /* Desain tampilan toko Anda */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f8f9fa; }
-        .navbar { background-color: #007bff; color: white; padding: 15px; font-weight: bold; border-radius: 8px; margin-bottom: 20px; }
-        .produk-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card-produk { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
-        .loading { text-align: center; font-size: 18px; color: #666; margin-top: 50px; }
+        body { font-family: sans-serif; margin: 20px; background-color: #f5f5f5; color: #333; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .loading { text-align: center; color: #666; font-style: italic; }
+        .error-box { background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; display: none; }
+        .success-box { background-color: #d4edda; color: #155724; padding: 15px; border-radius: 4px; display: none; }
     </style>
 </head>
 <body>
 
-    <div class="navbar">🛒 Selamat Datang di Toko Online Kami</div>
-
-    <div id="loading" class="loading">Sedang memuat produk... mohon tunggu...</div>
-    <div class="produk-container" id="produkList"></div>
+<div class="container">
+    <h2>Selamat Datang di Storefront</h2>
+    <hr>
+    <div id="loader" class="loading">Menghubungkan ke database Google Sheets...</div>
+    <div id="errorMsg" class="error-box"></div>
+    <div id="successMsg" class="success-box"></div>
+</div>
 
 <script>
-    // 1. Masukkan URL Web App Google Apps Script Anda di sini
-    const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyrRXp1HP1SrGUnJCvasF-yC-UFk5i1gt_fmQJwqEWn8H7L3Iwdvr82fsFCEwYuyrQK/exec";
+    // 1. GANTI INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyrRXp1HP1SrGUnJCvasF-yC-UFk5i1gt_fmQJwqEWn8H7L3Iwdvr82fsFCEwYuyrQK/exec"; 
 
-    // 2. Ambil data produk saat halaman pertama kali dibuka di GitHub
+    // 2. Jalankan pemanggilan API saat halaman dibuka
     document.addEventListener("DOMContentLoaded", function() {
-        // Kita panggil BACKEND_URL dengan menambahkan parameter ?action=getProduk
-        fetch(`${BACKEND_URL}?action=getProduk`, {
+        // Kita tambahkan ?action=getStorefront di ujung URL secara otomatis
+        fetch(`${WEB_APP_URL}?action=getStorefront`, {
             method: "GET",
             mode: "cors"
         })
         .then(response => response.json())
-        .then(response => {
-            // Sembunyikan tulisan loading jika data berhasil didapat
-            document.getElementById("loading").style.display = "none";
-            
-            const produkList = document.getElementById("produkList");
-            
-            // Contoh parsing data (Sesuaikan dengan struktur array data produk Anda)
-            if (response.status === "success") {
-                // Misal response Anda mengembalikan list produk
-                // response.data.forEach(produk => { ... })
-                
-                // Ini demo tampilan teks statis jika koneksi sukses:
-                produkList.innerHTML = `<div class="card-produk">
-                    <h3>Koneksi Sukses!</h3>
-                    <p>Halaman storefront berhasil dimuat dari GitHub tanpa banner Google.</p>
-                </div>`;
+        .then(res => {
+            document.getElementById("loader").style.display = "none";
+            if (res.status === "success") {
+                const successDiv = document.getElementById("successMsg");
+                successDiv.innerHTML = `<strong>Koneksi Berhasil Tanpa Banner!</strong><br>${res.message}`;
+                successDiv.style.display = "block";
+            } else {
+                showError(res.message);
             }
         })
-        .catch(error => {
-            document.getElementById("loading").innerText = "Gagal memuat data toko.";
-            console.error("Error:", error);
+        .catch(err => {
+            document.getElementById("loader").style.display = "none";
+            showError("Gagal terhubung ke server backend atau masalah CORS.");
+            console.error(err);
         });
     });
+
+    function showError(msg) {
+        const errDiv = document.getElementById("errorMsg");
+        errDiv.innerText = msg;
+        errDiv.style.display = "block";
+    }
 </script>
 
 </body>
