@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Masuk / Daftar — MahaMeru</title>
+<style>
+:root{--h:#1565c0;--ht:#0d47a1;--hm:#e3f2fd;--or:#e65100;--g:#16a34a;--r:#dc2626;--bg:#f0f4ff;--putih:#fff;--abu:#6b7280;--abu2:#374151;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;}
+.topbar{background:linear-gradient(135deg,var(--ht),var(--h) 60%,var(--or));padding:14px;display:flex;align-items:center;gap:10px;}
+.btn-back{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:9px;padding:7px 11px;font-size:15px;cursor:pointer;}
+.topbar-title{color:#fff;font-size:14px;font-weight:800;}
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px;}
+.card{background:var(--putih);border-radius:20px;padding:28px 24px;max-width:400px;width:100%;box-shadow:0 4px 24px rgba(21,101,192,.1);}
+.logo{text-align:center;font-size:40px;margin-bottom:6px;}
+.title{text-align:center;font-size:18px;font-weight:900;color:var(--abu2);margin-bottom:4px;}
+.sub{text-align:center;font-size:12px;color:var(--abu);margin-bottom:22px;}
+.tabs{display:flex;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:20px;}
+.tab{flex:1;text-align:center;padding:10px;border-radius:9px;font-size:13px;font-weight:800;color:var(--abu);cursor:pointer;}
+.tab.active{background:var(--putih);color:var(--ht);box-shadow:0 2px 6px rgba(0,0,0,.08);}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--abu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
+.fg input{width:100%;padding:12px 13px;border:1.8px solid #e5e7eb;border-radius:11px;font-size:13px;color:var(--abu2);background:var(--bg);outline:none;font-family:inherit;}
+.fg input:focus{border-color:var(--h);background:var(--putih);box-shadow:0 0 0 3px rgba(21,101,192,.10);}
+.btn-submit{width:100%;padding:14px;background:linear-gradient(135deg,var(--ht),var(--h));color:#fff;border:none;border-radius:13px;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;}
+.alert{border-radius:11px;padding:10px 13px;font-size:12.5px;display:none;align-items:center;gap:8px;font-weight:500;margin-bottom:14px;}
+.alert.err{background:#fef2f2;color:var(--r);border:1.5px solid #fca5a5;display:flex;}
+.alert.ok{background:#dcfce7;color:var(--g);border:1.5px solid #86efac;display:flex;}
+.spin{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.guest-link{text-align:center;margin-top:16px;font-size:12px;color:var(--abu);}
+.guest-link a{color:var(--or);font-weight:700;cursor:pointer;text-decoration:none;}
+.panel{display:none;}
+.panel.show{display:block;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button class="btn-back" onclick="window.location.href='./index.html'">←</button>
+  <div class="topbar-title">Akun MahaMeru</div>
+</div>
+<div class="wrap">
+  <div class="card">
+    <div class="logo">🛍️</div>
+    <div class="title">Selamat Datang</div>
+    <div class="sub">Masuk atau daftar untuk pengalaman belanja lebih baik</div>
+
+    <div class="tabs">
+      <div class="tab active" id="tabLogin" onclick="switchTab('login')">Masuk</div>
+      <div class="tab" id="tabDaftar" onclick="switchTab('daftar')">Daftar</div>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <!-- PANEL LOGIN -->
+    <div class="panel show" id="panelLogin">
+      <div class="fg"><label>Email</label><input type="email" id="lEmail" placeholder="email@anda.com" autocomplete="email"></div>
+      <div class="fg"><label>Password</label><input type="password" id="lPassword" placeholder="Password" autocomplete="current-password"></div>
+      <button class="btn-submit" id="btnLogin" onclick="doLogin()">🔑 Masuk</button>
+    </div>
+
+    <!-- PANEL DAFTAR -->
+    <div class="panel" id="panelDaftar">
+      <div class="fg"><label>Nama Lengkap</label><input type="text" id="rNama" placeholder="Nama lengkap"></div>
+      <div class="fg"><label>Email</label><input type="email" id="rEmail" placeholder="email@anda.com" autocomplete="email"></div>
+      <div class="fg"><label>No. HP</label><input type="tel" id="rHp" placeholder="08xxxxxxxxxx" inputmode="tel"></div>
+      <div class="fg"><label>Password</label><input type="password" id="rPassword" placeholder="Min. 6 karakter" autocomplete="new-password"></div>
+      <button class="btn-submit" id="btnDaftar" onclick="doDaftar()">📝 Daftar Sekarang</button>
+    </div>
+
+    <div class="guest-link">Atau <a onclick="window.location.href='./index.html'">lanjut belanja sebagai tamu</a></div>
+  </div>
+</div>
+
+<script>
+// ⚠️ GANTI dengan URL exec hasil deploy Code.gs Apti (samakan dengan file lain)
+const SCRIPT_URL = "https://script.google.com/macros/s/GANTI_DENGAN_ID_DEPLOYMENT/exec";
+
+function apiPost(action, body){
+  var url = new URL(SCRIPT_URL);
+  url.searchParams.set('action', action);
+  return fetch(url.toString(), {
+    method:'POST',
+    headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+    body: JSON.stringify(body||{})
+  }).then(function(r){ return r.json(); });
+}
+
+function switchTab(t){
+  document.getElementById('tabLogin').classList.toggle('active', t==='login');
+  document.getElementById('tabDaftar').classList.toggle('active', t==='daftar');
+  document.getElementById('panelLogin').classList.toggle('show', t==='login');
+  document.getElementById('panelDaftar').classList.toggle('show', t==='daftar');
+  document.getElementById('alertBox').className='alert';
+}
+
+function showAl(msg, type){
+  var el=document.getElementById('alertBox');
+  el.textContent=msg; el.className='alert '+type;
+}
+
+// Kalau URL dibuka dengan #daftar (dari tombol "Daftar Member Baru" di storefront)
+if(window.location.hash==='#daftar') switchTab('daftar');
+
+function _simpanSesi(r){
+  sessionStorage.setItem('mm_cust_token', r.token);
+  sessionStorage.setItem('mm_cust_nama',  r.nama||'');
+  sessionStorage.setItem('mm_cust_email', r.email||'');
+}
+
+function doLogin(){
+  var email=document.getElementById('lEmail').value.trim();
+  var password=document.getElementById('lPassword').value;
+  if(!email||!password){ showAl('⚠️ Email dan password wajib diisi.','err'); return; }
+
+  var btn=document.getElementById('btnLogin');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Memproses…';
+
+  apiPost('loginCustomer', { email:email, password:password }).then(function(r){
+    btn.disabled=false; btn.innerHTML='🔑 Masuk';
+    if(!r.ok){ showAl('⚠️ '+r.msg,'err'); return; }
+    _simpanSesi(r);
+    showAl('✅ Berhasil masuk! Mengarahkan ke storefront…','ok');
+    setTimeout(function(){ window.location.href='./index.html'; }, 600);
+  }).catch(function(e){
+    btn.disabled=false; btn.innerHTML='🔑 Masuk';
+    showAl('⚠️ '+((e&&e.message)||'Gagal terhubung ke server.'),'err');
+  });
+}
+
+function doDaftar(){
+  var nama=document.getElementById('rNama').value.trim();
+  var email=document.getElementById('rEmail').value.trim();
+  var hp=document.getElementById('rHp').value.trim();
+  var password=document.getElementById('rPassword').value;
+
+  if(!nama||!email||!password){ showAl('⚠️ Nama, email, dan password wajib diisi.','err'); return; }
+  if(password.length<6){ showAl('⚠️ Password minimal 6 karakter.','err'); return; }
+
+  var btn=document.getElementById('btnDaftar');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Mendaftarkan…';
+
+  apiPost('registerCustomer', { payload: { NAMA:nama, EMAIL:email, HP:hp, PASSWORD:password } }).then(function(r){
+    btn.disabled=false; btn.innerHTML='📝 Daftar Sekarang';
+    if(!r.ok){ showAl('⚠️ '+r.msg,'err'); return; }
+    _simpanSesi(r);
+    showAl('✅ '+(r.msg||'Registrasi berhasil!')+' Mengarahkan…','ok');
+    setTimeout(function(){ window.location.href='./index.html'; }, 600);
+  }).catch(function(e){
+    btn.disabled=false; btn.innerHTML='📝 Daftar Sekarang';
+    showAl('⚠️ '+((e&&e.message)||'Gagal terhubung ke server.'),'err');
+  });
+}
+</script>
+</body>
+</html>
