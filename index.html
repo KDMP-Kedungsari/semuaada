@@ -719,7 +719,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height
 //  STATE & SESSION
 // ══════════════════════════════════════════════════════════
 // ⚠️ GANTI dengan URL exec hasil deploy Code.gs Apti (samakan dengan file lain)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwceJC_15i5-5lo4D6vKDvX50ZCe99J-s42VYYeJJPRkZLcS1tXKjSt7DaSxDO71P8/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPz4bUmaBfKrA8GvVaOYHZPefbQ9Qicbn-2qA1ilZCD9llKmcJH7M5fqxHMcsDKxU/exec";
 var _SCRIPT_URL = SCRIPT_URL; // dipertahankan supaya kode lama yang masih merujuk _SCRIPT_URL tetap jalan
 
 // ── Pembungkus fetch API (GET, publik/read-only) ──
@@ -1368,7 +1368,7 @@ function logoutAdmin(){
   showToast('✅ Berhasil keluar dari panel admin');
 }
 function logoutCustomer(){
-  // TODO: panggil API logout server-side begitu login/akun customer dimigrasi.
+  if(CUST_TOKEN) apiPost('logoutCustomer', { custToken: CUST_TOKEN }).catch(function(){});
   sessionStorage.removeItem('mm_cust_token'); sessionStorage.removeItem('mm_cust_nama'); sessionStorage.removeItem('mm_cust_email');
   CUST_TOKEN=''; CUST_NAMA=''; CUST_EMAIL='';
   // Voucher terikat ke customer -> bersihkan juga saat logout
@@ -1382,13 +1382,11 @@ function logoutCustomer(){
 }
 function goLogin(){
   closeBs('bsAkun');
-  showLoading();
-  window.location.href=SCRIPT_URL+'?page=login';
+  window.location.href='./login.html';
 }
 function goDaftar(){
   closeBs('bsAkun');
-  showLoading();
-  window.location.href=SCRIPT_URL+'?page=login#daftar';
+  window.location.href='./login.html#daftar';
 }
 function goUbahProfil(){
   closeBs('bsAkun');
@@ -1404,8 +1402,22 @@ function goUbahProfil(){
   document.getElementById('pfPwBaru').value   = '';
   document.getElementById('pfAlert').className = 'pf-alert';
 
-  // Fitur ubah profil (baca dari server) belum dimigrasi -- lihat submitProfil().
-  document.getElementById('pfAlert').className = 'pf-alert';
+  // Muat data profil lengkap dari server
+  if(CUST_TOKEN){
+    document.getElementById('pfAlert').textContent = '⏳ Memuat data...';
+    document.getElementById('pfAlert').className   = 'pf-alert ok';
+    apiGet('customerProfile', { custToken: CUST_TOKEN }).then(function(r){
+      document.getElementById('pfAlert').className = 'pf-alert';
+      if(r && r.ok && r.data){
+        var d = r.data;
+        document.getElementById('pfHp').value       = String(d.HP      != null && d.HP      !== '' ? d.HP      : '');
+        document.getElementById('pfAlamat').value   = d.ALAMAT   || '';
+        document.getElementById('pfKota').value     = d.KOTA     || '';
+        document.getElementById('pfProvinsi').value = d.PROVINSI || '';
+        document.getElementById('pfKodepos').value  = String(d.KODEPOS != null && d.KODEPOS !== '' ? d.KODEPOS : '');
+      }
+    }).catch(function(){ document.getElementById('pfAlert').className = 'pf-alert'; });
+  }
 
   document.getElementById('mProfilBg').classList.add('show');
   document.body.style.overflow = 'hidden';
@@ -1423,7 +1435,47 @@ function pfToggleEye(inputId, btnId){
 }
 
 function submitProfil(){
-  _fiturBelumTersedia('Ubah Profil');
+  var nama     = document.getElementById('pfNama').value.trim();
+  var hp       = String(document.getElementById('pfHp').value).trim();
+  var alamat   = document.getElementById('pfAlamat').value.trim();
+  var kota     = document.getElementById('pfKota').value.trim();
+  var provinsi = document.getElementById('pfProvinsi').value.trim();
+  var kodepos  = String(document.getElementById('pfKodepos').value).trim();
+  var pwLama   = document.getElementById('pfPwLama').value;
+  var pwBaru   = document.getElementById('pfPwBaru').value;
+
+  if(!nama){ pfShowAlert('Nama tidak boleh kosong.','err'); return; }
+  if(pwBaru && !pwLama){ pfShowAlert('Isi Password Lama untuk konfirmasi.','err'); return; }
+  if(pwBaru && pwBaru.length < 6){ pfShowAlert('Password baru minimal 6 karakter.','err'); return; }
+
+  var payload = {
+    NAMA: nama, HP: hp, ALAMAT: alamat,
+    KOTA: kota, PROVINSI: provinsi, KODEPOS: kodepos
+  };
+  if(pwLama) payload.PW_LAMA = pwLama;
+  if(pwBaru) payload.PW_BARU = pwBaru;
+
+  var btn = document.getElementById('btnPfSave');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="pf-spin"></span> Menyimpan...';
+
+  apiPost('updateProfile', { custToken: CUST_TOKEN, payload: payload }).then(function(r){
+      btn.disabled = false;
+      btn.innerHTML = '💾 Simpan Perubahan';
+      if(!r.ok){ pfShowAlert(r.msg || 'Gagal menyimpan.', 'err'); return; }
+      pfShowAlert(r.msg || 'Profil diperbarui.', 'ok');
+      CUST_NAMA = nama;
+      sessionStorage.setItem('mm_cust_nama', nama);
+      document.getElementById('navAkunLbl').textContent = nama.split(' ')[0];
+      document.getElementById('pfPwLama').value = '';
+      document.getElementById('pfPwBaru').value = '';
+      setTimeout(closeMProfil, 1200);
+    })
+    .catch(function(e){
+      btn.disabled = false;
+      btn.innerHTML = '💾 Simpan Perubahan';
+      pfShowAlert('Error: ' + ((e&&e.message)||'Gagal terhubung ke server.'), 'err');
+    });
 }
 
 function pfShowAlert(msg, type){
