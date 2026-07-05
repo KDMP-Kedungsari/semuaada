@@ -59,7 +59,7 @@
 
 <script>
 // ⚠️ GANTI dengan URL exec hasil deploy Code.gs Apti (samakan dengan index.html)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydIwz3ZPkmBJNRcHGCOilNbXc0Ox6FJSIfNiX-aooYo_AUerCLS01qazlNxYM7wPA/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwceJC_15i5-5lo4D6vKDvX50ZCe99J-s42VYYeJJPRkZLcS1tXKjSt7DaSxDO71P8/exec";
 
 function getParam(name){
   return new URLSearchParams(window.location.search).get(name);
@@ -161,14 +161,11 @@ function render(){
 }
 
 function beliSekarang(){
-  // Checkout & keranjang masih di sistem lama (script.google.com) --
-  // sengaja diarahkan ke sana khusus untuk transaksi, supaya proses
-  // browsing produk (mayoritas traffic) tetap 100% bebas banner Google,
-  // dan banner hanya muncul di momen checkout yang jauh lebih jarang.
-  const base = SCRIPT_URL.replace(/\/exec.*$/, '/exec');
-  const url = base + '?page=checkout&id=' + encodeURIComponent(produk.ID_INTERNAL)
+  // Checkout sekarang JUGA sudah dimigrasi ke halaman statis (checkout.html)
+  // di GitHub Pages -- alur beli sekarang jadi 100% bebas banner Google,
+  // dari browsing sampai bikin pesanan.
+  window.location.href = './checkout.html?id=' + encodeURIComponent(produk.ID_INTERNAL)
             + '&satuan=' + encodeURIComponent(satuanTerpilih.ID_SATUAN);
-  window.location.href = url;
 }
 
 function load(){
