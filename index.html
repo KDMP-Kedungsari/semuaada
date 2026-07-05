@@ -144,7 +144,7 @@ function loadProduk(){
           <img src="${p.FOTO_1 || 'https://via.placeholder.com/300?text=No+Image'}" alt="${p.NAMA_PRODUK}">
         </div>
         <div class="info">
-          <div class="nama">${p.NAMA_SINGKAT || p.NAMA_PRODUK}</div>
+          <div class="nama">${p.NAMA_PRODUK || p.NAMA_SINGKAT}</div>
           <div class="harga">${formatRupiah(p.HARGA_JUAL)}</div>
           <div class="satuan">/ ${p.NAMA_SATUAN || 'unit'} · SKU ${p.ID_INTERNAL}</div>
           <div class="stok ${habis?'habis':'ada'}">${habis ? 'Stok habis' : 'Stok: ' + p.QTY_STOK}</div>
