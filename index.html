@@ -1,70 +1,202 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Storefront Toko Kedungsari</title>
-    <style>
-        body { font-family: sans-serif; margin: 20px; background-color: #f5f5f5; color: #333; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .loading { text-align: center; color: #666; font-style: italic; }
-        .error-box { background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; display: none; }
-        .success-box { background-color: #d4edda; color: #155724; padding: 15px; border-radius: 4px; display: none; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MahaMeru Storefront</title>
+<style>
+  :root{
+    --brand:#0f766e; --brand-dark:#0b5852; --bg:#f7f7f8; --card:#ffffff;
+    --text:#1f2937; --muted:#6b7280; --border:#e5e7eb; --promo:#dc2626;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  header{background:var(--brand);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:10;}
+  header h1{margin:0;font-size:18px;}
+  .search-bar{max-width:1100px;margin:10px auto 0;display:flex;gap:8px;padding:0 16px;}
+  .search-bar input{flex:1;padding:10px 12px;border-radius:8px;border:none;font-size:14px;}
+  .search-bar select{padding:10px;border-radius:8px;border:none;font-size:14px;}
+  .search-bar button{padding:10px 16px;border:none;border-radius:8px;background:var(--brand-dark);color:#fff;cursor:pointer;}
+
+  /* Banner carousel */
+  .banner-wrap{max-width:1100px;margin:16px auto;padding:0 16px;}
+  .banner-track{display:flex;overflow-x:auto;gap:12px;scroll-snap-type:x mandatory;border-radius:12px;}
+  .banner-slide{min-width:100%;scroll-snap-align:start;position:relative;border-radius:12px;overflow:hidden;background:#ddd;aspect-ratio:16/6;}
+  .banner-slide img{width:100%;height:100%;object-fit:cover;display:block;}
+  .banner-cap{position:absolute;left:0;bottom:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;padding:16px;}
+  .banner-cap b{font-size:16px;} .banner-cap span{font-size:13px;opacity:.9;}
+
+  main{max-width:1100px;margin:0 auto;padding:0 16px 40px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:.15s;}
+  .card:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);}
+  .card .thumb{aspect-ratio:1/1;background:#eee;position:relative;}
+  .card .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .badge-promo{position:absolute;top:6px;left:6px;background:var(--promo);color:#fff;font-size:10px;padding:3px 6px;border-radius:6px;font-weight:600;}
+  .card .info{padding:8px 10px;}
+  .card .nama{font-size:13px;font-weight:600;line-height:1.3;min-height:34px;}
+  .card .harga{color:var(--brand-dark);font-weight:700;font-size:14px;margin-top:4px;}
+  .card .satuan{color:var(--muted);font-size:11px;}
+  .card .stok{font-size:11px;margin-top:4px;}
+  .stok.habis{color:var(--promo);} .stok.ada{color:#059669;}
+
+  .empty{text-align:center;color:var(--muted);padding:40px 0;}
+  .pagination{display:flex;justify-content:center;gap:6px;margin-top:20px;flex-wrap:wrap;}
+  .pagination button{min-width:34px;padding:6px 10px;border:1px solid var(--border);background:#fff;border-radius:8px;cursor:pointer;font-size:13px;}
+  .pagination button.active{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .pagination button:disabled{opacity:.4;cursor:default;}
+  .loading{text-align:center;padding:30px;color:var(--muted);}
+</style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Selamat Datang di Storefront</h2>
-    <hr>
-    <div id="loader" class="loading">Menghubungkan ke database Google Sheets...</div>
-    <div id="errorMsg" class="error-box"></div>
-    <div id="successMsg" class="success-box"></div>
+<header>
+  <h1>MahaMeru Storefront</h1>
+  <div class="search-bar">
+    <input id="q" type="text" placeholder="Cari produk...">
+    <select id="kategori"><option value="">Semua Kategori</option></select>
+    <select id="sort">
+      <option value="">Urutan Default</option>
+      <option value="murah">Harga Termurah</option>
+      <option value="mahal">Harga Termahal</option>
+    </select>
+    <button onclick="resetAndLoad()">Cari</button>
+  </div>
+</header>
+
+<div class="banner-wrap">
+  <div class="banner-track" id="bannerTrack"></div>
 </div>
 
-<script>
-    // 1. GANTI INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyrRXp1HP1SrGUnJCvasF-yC-UFk5i1gt_fmQJwqEWn8H7L3Iwdvr82fsFCEwYuyrQK/exec"; 
+<main>
+  <div id="grid" class="grid"></div>
+  <div id="pagination" class="pagination"></div>
+</main>
 
-    // 2. Jalankan pemanggilan API saat halaman dibuka
-    // Ambil data produk saat halaman pertama kali dibuka di GitHub
-    document.addEventListener("DOMContentLoaded", function() {
-        
-        // PENTING: Gunakan mode 'no-cors' atau hapus pengaturan mode agar browser mau menerima redirect dari Google
-        fetch(`${WEB_APP_URL}?action=getStorefront`)
-        .then(response => {
-            // Karena Google Script melakukan redirect (status 302), 
-            // pastikan kita mendapatkan respons teks/json dengan benar
-            return response.json();
-        })
-        .then(res => {
-            document.getElementById("loader").style.display = "none";
-            if (res.status === "success") {
-                const successDiv = document.getElementById("successMsg");
-                successDiv.innerHTML = `<strong>Koneksi Berhasil Tanpa Banner!</strong><br>${res.message}`;
-                successDiv.style.display = "block";
-            } else {
-                showError(res.message);
-            }
-        })
-        .catch(error => {
-            document.getElementById("loader").style.display = "none";
-            
-            // PENTING: Kadang karena redirect Google, catch akan mendeteksi error 'TypeError: Failed to fetch'
-            // Padahal datanya sebenarnya masuk atau eksekusi di Apps Script sudah berhasil.
-            // Mari kita cek status asli via console
-            console.log("Mencoba alternatif parsing jika terkena batasan browser...");
-            
-            showError("Terjadi kendala CORS browser. Pastikan URL Web App sudah di-deploy sebagai 'Anyone' (Siapa saja).");
-        });
+<script>
+// ⚠️ GANTI dengan URL exec hasil deploy Code.gs Apti
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4-zMEGeDB_yhVOYg_fDVV3bT8GMq1awkvnDDCIp-zQpRdzbXL5tOfpVfyUsOrEfc/exec";
+
+let state = { q:"", idKategori:"", sort:"", page:1, pageSize:12 };
+
+function apiGet(action, params){
+  const url = new URL(SCRIPT_URL);
+  url.searchParams.set('action', action);
+  Object.keys(params||{}).forEach(k => url.searchParams.set(k, params[k]));
+  return fetch(url.toString()).then(r => r.json());
+}
+
+function formatRupiah(n){
+  return "Rp " + Number(n||0).toLocaleString('id-ID');
+}
+
+function loadKategori(){
+  apiGet('kategori', {}).then(res => {
+    if(!res.ok) return;
+    const sel = document.getElementById('kategori');
+    res.data.forEach(k => {
+      const opt = document.createElement('option');
+      opt.value = k.ID_KATEGORI; opt.textContent = k.NAMA;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function loadBanner(){
+  apiGet('banner', {}).then(res => {
+    const track = document.getElementById('bannerTrack');
+    track.innerHTML = "";
+    if(!res.ok || !res.data.length) return;
+    res.data.forEach(b => {
+      const slide = document.createElement('div');
+      slide.className = 'banner-slide';
+      slide.innerHTML = `
+        <img src="${b.GAMBAR_URL || ''}" alt="${b.JUDUL||''}">
+        <div class="banner-cap"><b>${b.JUDUL||''}</b><br><span>${b.SUBJUDUL||''}</span></div>`;
+      slide.onclick = () => {
+        if (b.TIPE === 'produk' && b.ID_PRODUK) openProduk(b.ID_PRODUK);
+        else if (b.LINK_KLIK) window.open(b.LINK_KLIK, '_blank');
+      };
+      track.appendChild(slide);
+    });
+  });
+}
+
+function loadProduk(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="loading">Memuat produk...</div>';
+  apiGet('produk', {
+    q: state.q, idKategori: state.idKategori, sort: state.sort,
+    page: state.page, pageSize: state.pageSize
+  }).then(res => {
+    grid.innerHTML = "";
+    if(!res.ok){ grid.innerHTML = `<div class="empty">${res.msg||'Gagal memuat produk.'}</div>`; return; }
+    if(!res.produk.length){ grid.innerHTML = '<div class="empty">Produk tidak ditemukan.</div>'; return; }
+
+    res.produk.forEach(p => {
+      const habis = Number(p.QTY_STOK) <= 0;
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.onclick = () => openProduk(p.ID_INTERNAL);
+      card.innerHTML = `
+        <div class="thumb">
+          ${p.HAS_PROMO ? `<div class="badge-promo">${p.PROMO_LABEL}</div>` : ''}
+          <img src="${p.FOTO_1 || 'https://via.placeholder.com/300?text=No+Image'}" alt="${p.NAMA_PRODUK}">
+        </div>
+        <div class="info">
+          <div class="nama">${p.NAMA_SINGKAT || p.NAMA_PRODUK}</div>
+          <div class="harga">${formatRupiah(p.HARGA_JUAL)}</div>
+          <div class="satuan">/ ${p.NAMA_SATUAN || 'unit'} · SKU ${p.ID_INTERNAL}</div>
+          <div class="stok ${habis?'habis':'ada'}">${habis ? 'Stok habis' : 'Stok: ' + p.QTY_STOK}</div>
+        </div>`;
+      grid.appendChild(card);
     });
 
-    function showError(msg) {
-        const errDiv = document.getElementById("errorMsg");
-        errDiv.innerText = msg;
-        errDiv.style.display = "block";
-    }
-</script>
+    renderPagination(res.page, res.pages);
+  }).catch(err => {
+    grid.innerHTML = `<div class="empty">Gagal memuat produk (cek koneksi/URL API). ${err}</div>`;
+  });
+}
 
+function renderPagination(page, pages){
+  const box = document.getElementById('pagination');
+  box.innerHTML = "";
+  if(pages<=1) return;
+  const mkBtn = (label, target, disabled, active) => {
+    const b = document.createElement('button');
+    b.textContent = label; b.disabled = !!disabled;
+    if(active) b.classList.add('active');
+    b.onclick = () => { state.page = target; loadProduk(); window.scrollTo({top:0,behavior:'smooth'}); };
+    return b;
+  };
+  box.appendChild(mkBtn('«', page-1, page<=1));
+  for(let i=1;i<=pages;i++){
+    if(pages>7 && Math.abs(i-page)>2 && i!==1 && i!==pages){
+      if(i===2 || i===pages-1){ const s=document.createElement('span'); s.textContent='...'; box.appendChild(s); }
+      continue;
+    }
+    box.appendChild(mkBtn(i, i, false, i===page));
+  }
+  box.appendChild(mkBtn('»', page+1, page>=pages));
+}
+
+function openProduk(idInternal){
+  // Tahap berikutnya: arahkan ke halaman detail produk (masih di GAS,
+  // atau nanti dimigrasi juga). Untuk sekarang buka lewat exec URL asli.
+  window.open(SCRIPT_URL.replace('/exec','') + '/exec?page=produkDetail&id=' + encodeURIComponent(idInternal), '_blank');
+}
+
+function resetAndLoad(){
+  state.q = document.getElementById('q').value.trim();
+  state.idKategori = document.getElementById('kategori').value;
+  state.sort = document.getElementById('sort').value;
+  state.page = 1;
+  loadProduk();
+}
+
+loadKategori();
+loadBanner();
+loadProduk();
+</script>
 </body>
 </html>
