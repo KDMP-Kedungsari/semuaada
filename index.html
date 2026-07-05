@@ -3,79 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Saya - Bebas Banner</title>
+    <title>Storefront - Toko Saya</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f6f9; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { background-color: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #0056b3; }
-        #respons { margin-top: 15px; padding: 10px; border-radius: 4px; display: none; }
-        .sukses { background-color: #d4edda; color: #155724; }
+        /* Desain tampilan toko Anda */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f8f9fa; }
+        .navbar { background-color: #007bff; color: white; padding: 15px; font-weight: bold; border-radius: 8px; margin-bottom: 20px; }
+        .produk-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .card-produk { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
+        .loading { text-align: center; font-size: 18px; color: #666; margin-top: 50px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Form Input Data</h2>
-    <form id="myForm">
-        <label for="nama">Nama:</label>
-        <input type="text" id="nama" name="nama" required placeholder="Masukkan nama...">
-        
-        <label for="info">Informasi Tambahan:</label>
-        <input type="text" id="info" name="info" required placeholder="Masukkan info...">
-        
-        <button type="submit" id="btnSubmit">Kirim Data</button>
-    </form>
-    
-    <div id="respons"></div>
-</div>
+    <div class="navbar">🛒 Selamat Datang di Toko Online Kami</div>
+
+    <div id="loading" class="loading">Sedang memuat produk... mohon tunggu...</div>
+    <div class="produk-container" id="produkList"></div>
 
 <script>
-    // GANTI dengan URL Web App Google Apps Script Anda yang baru
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzVDAHSMBnyIuPJZdgc3sQzrUcWNHPhu1Ru96grfBLKgG5kaxZ_pviJbEcGuQOOU5B5/exec";
+    // 1. Masukkan URL Web App Google Apps Script Anda di sini
+    const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzVDAHSMBnyIuPJZdgc3sQzrUcWNHPhu1Ru96grfBLKgG5kaxZ_pviJbEcGuQOOU5B5/exec";
 
-    document.getElementById('myForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const btn = document.getElementById('btnSubmit');
-        const responsDiv = document.getElementById('respons');
-        
-        btn.innerText = "Mengirim...";
-        btn.disabled = true;
-
-        // Mengambil data dari form
-        const formData = new FormData(this);
-        
-        // Mengubah formData menjadi URLSearchParams agar terbaca oleh doPost(e) di Apps Script
-        const searchParams = new URLSearchParams();
-        for (const pair of formData) {
-            searchParams.append(pair[0], pair[1]);
-        }
-
-        // Mengirim data menggunakan FETCH (Pengganti google.script.run)
-        fetch(WEB_APP_URL, {
-            method: 'POST',
-            mode: 'cors', // Penting agar tidak terkena CORS error
-            body: searchParams
+    // 2. Ambil data produk saat halaman pertama kali dibuka di GitHub
+    document.addEventListener("DOMContentLoaded", function() {
+        // Kita panggil BACKEND_URL dengan menambahkan parameter ?action=getProduk
+        fetch(`${BACKEND_URL}?action=getProduk`, {
+            method: "GET",
+            mode: "cors"
         })
         .then(response => response.json())
-        .then(data => {
-            responsDiv.className = "sukses";
-            responsDiv.innerText = "Data berhasil disimpan!";
-            responsDiv.style.display = "block";
-            document.getElementById('myForm').reset();
+        .then(response => {
+            // Sembunyikan tulisan loading jika data berhasil didapat
+            document.getElementById("loading").style.display = "none";
+            
+            const produkList = document.getElementById("produkList");
+            
+            // Contoh parsing data (Sesuaikan dengan struktur array data produk Anda)
+            if (response.status === "success") {
+                // Misal response Anda mengembalikan list produk
+                // response.data.forEach(produk => { ... })
+                
+                // Ini demo tampilan teks statis jika koneksi sukses:
+                produkList.innerHTML = `<div class="card-produk">
+                    <h3>Koneksi Sukses!</h3>
+                    <p>Halaman storefront berhasil dimuat dari GitHub tanpa banner Google.</p>
+                </div>`;
+            }
         })
         .catch(error => {
-            console.error('Error:', error);
-            // Tetap anggap sukses jika Apps Script berhasil memproses namun terkendala redirect CORS CORS balik
-            responsDiv.className = "sukses";
-            responsDiv.innerText = "Proses selesai!";
-            responsDiv.style.display = "block";
-        })
-        .finally(() => {
-            btn.innerText = "Kirim Data";
-            btn.disabled = false;
+            document.getElementById("loading").innerText = "Gagal memuat data toko.";
+            console.error("Error:", error);
         });
     });
 </script>
