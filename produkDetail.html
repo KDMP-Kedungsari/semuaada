@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detail Produk - MahaMeru</title>
+<style>
+  :root{
+    --brand:#0f766e; --brand-dark:#0b5852; --bg:#f7f7f8; --card:#ffffff;
+    --text:#1f2937; --muted:#6b7280; --border:#e5e7eb;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  header{background:var(--brand);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;}
+  header a{color:#fff;text-decoration:none;font-size:20px;}
+  header h1{margin:0;font-size:16px;font-weight:600;}
+
+  main{max-width:900px;margin:0 auto;padding:16px;}
+  .wrap{background:var(--card);border-radius:14px;overflow:hidden;border:1px solid var(--border);}
+  .gallery{aspect-ratio:1/1;max-height:420px;background:#eee;position:relative;}
+  .gallery img,.gallery iframe{width:100%;height:100%;object-fit:contain;display:block;border:none;background:#fff;}
+  .thumbs{display:flex;gap:8px;padding:10px;overflow-x:auto;}
+  .thumbs img{width:60px;height:60px;object-fit:cover;border-radius:8px;border:2px solid transparent;cursor:pointer;}
+  .thumbs img.active{border-color:var(--brand);}
+
+  .body-info{padding:16px;}
+  .nama{font-size:19px;font-weight:700;margin:0 0 4px;}
+  .sku{color:var(--muted);font-size:12px;margin-bottom:10px;}
+  .harga{font-size:24px;font-weight:800;color:var(--brand-dark);margin:8px 0;}
+  .stok{font-size:13px;margin-bottom:14px;font-weight:600;}
+  .stok.habis{color:#dc2626;} .stok.ada{color:#059669;}
+
+  .satuan-row{margin:14px 0;}
+  .satuan-row label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
+  .satuan-opts{display:flex;flex-wrap:wrap;gap:8px;}
+  .satuan-opts button{padding:8px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;}
+  .satuan-opts button.active{background:var(--brand);color:#fff;border-color:var(--brand);}
+
+  .desk{margin-top:16px;font-size:14px;line-height:1.6;color:#374151;white-space:pre-wrap;}
+
+  .action-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:10px;max-width:900px;margin:0 auto;}
+  .btn-buy{flex:1;background:var(--brand);color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;}
+  .btn-buy:disabled{background:#9ca3af;cursor:not-allowed;}
+  .btn-back-store{padding:14px 16px;border:1px solid var(--border);background:#fff;border-radius:10px;cursor:pointer;font-size:14px;}
+
+  .loading,.err{text-align:center;padding:60px 20px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="./index.html" title="Kembali ke storefront">←</a>
+  <h1>Detail Produk</h1>
+</header>
+
+<main id="main">
+  <div class="loading">Memuat produk...</div>
+</main>
+
+<script>
+// ⚠️ GANTI dengan URL exec hasil deploy Code.gs Apti (samakan dengan index.html)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4-zMEGeDB_yhVOYg_fDVV3bT8GMq1awkvnDDCIp-zQpRdzbXL5tOfpVfyUsOrEfc/exec";
+
+function getParam(name){
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+function formatRupiah(n){
+  return "Rp " + Number(n||0).toLocaleString('id-ID');
+}
+
+let produk = null;
+let satuanTerpilih = null;
+
+function apiGet(action, params){
+  const url = new URL(SCRIPT_URL);
+  url.searchParams.set('action', action);
+  Object.keys(params||{}).forEach(k => url.searchParams.set(k, params[k]));
+  return fetch(url.toString()).then(r => r.json());
+}
+
+function render(){
+  const main = document.getElementById('main');
+  const habis = Number(produk.QTY_STOK) <= 0;
+  const fotos = [produk.FOTO_1, produk.FOTO_2, produk.FOTO_3].filter(Boolean);
+  const hasVideo = !!produk.VIDEO_YOUTUBE;
+
+  main.innerHTML = `
+    <div class="wrap">
+      <div class="gallery" id="galleryMain">
+        ${fotos[0] ? `<img src="${fotos[0]}">` : `<img src="https://via.placeholder.com/500?text=No+Image">`}
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+      <div class="body-info">
+        <div class="nama">${produk.NAMA_PRODUK}</div>
+        <div class="sku">SKU: ${produk.ID_INTERNAL}</div>
+        <div class="harga" id="hargaTampil">${formatRupiah(produk.HARGA_JUAL)}</div>
+        <div class="stok ${habis?'habis':'ada'}" id="stokTampil">
+          ${habis ? 'Stok habis' : 'Stok tersedia: ' + produk.QTY_STOK}
+        </div>
+
+        ${produk.SATUAN_LIST.length > 1 ? `
+        <div class="satuan-row">
+          <label>Pilih Satuan</label>
+          <div class="satuan-opts" id="satuanOpts"></div>
+        </div>` : ''}
+
+        ${produk.DESKRIPSI ? `<div class="desk">${produk.DESKRIPSI}</div>` : ''}
+        ${hasVideo ? `<div class="desk">🎬 <a href="${produk.VIDEO_YOUTUBE}" target="_blank">Lihat video produk</a></div>` : ''}
+      </div>
+    </div>
+  `;
+
+  // Thumbnails
+  const thumbBox = document.getElementById('thumbs');
+  fotos.forEach((url, i) => {
+    const img = document.createElement('img');
+    img.src = url;
+    if (i===0) img.classList.add('active');
+    img.onclick = () => {
+      document.querySelector('#galleryMain img,#galleryMain iframe')?.remove();
+      const g = document.getElementById('galleryMain');
+      g.innerHTML = `<img src="${url}">`;
+      thumbBox.querySelectorAll('img').forEach(t=>t.classList.remove('active'));
+      img.classList.add('active');
+    };
+    thumbBox.appendChild(img);
+  });
+
+  // Satuan selector
+  satuanTerpilih = produk.SATUAN_LIST.find(s => s.IS_DEFAULT_JUAL) || produk.SATUAN_LIST[0];
+  if (produk.SATUAN_LIST.length > 1) {
+    const box = document.getElementById('satuanOpts');
+    produk.SATUAN_LIST.forEach(s => {
+      const btn = document.createElement('button');
+      btn.textContent = s.NAMA_SATUAN;
+      if (s.ID_SATUAN === satuanTerpilih.ID_SATUAN) btn.classList.add('active');
+      btn.onclick = () => {
+        satuanTerpilih = s;
+        box.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('hargaTampil').textContent = formatRupiah(s.HARGA_JUAL);
+      };
+      box.appendChild(btn);
+    });
+  }
+
+  // Action bar
+  const bar = document.createElement('div');
+  bar.className = 'action-bar';
+  bar.innerHTML = `
+    <button class="btn-back-store" onclick="window.location.href='./index.html'">Storefront</button>
+    <button class="btn-buy" id="btnBeli" ${habis ? 'disabled' : ''}>
+      ${habis ? 'Stok Habis' : 'Beli Sekarang'}
+    </button>
+  `;
+  main.appendChild(bar);
+  if (!habis) {
+    document.getElementById('btnBeli').onclick = beliSekarang;
+  }
+}
+
+function beliSekarang(){
+  // Checkout & keranjang masih di sistem lama (script.google.com) --
+  // sengaja diarahkan ke sana khusus untuk transaksi, supaya proses
+  // browsing produk (mayoritas traffic) tetap 100% bebas banner Google,
+  // dan banner hanya muncul di momen checkout yang jauh lebih jarang.
+  const base = SCRIPT_URL.replace(/\/exec.*$/, '/exec');
+  const url = base + '?page=checkout&id=' + encodeURIComponent(produk.ID_INTERNAL)
+            + '&satuan=' + encodeURIComponent(satuanTerpilih.ID_SATUAN);
+  window.location.href = url;
+}
+
+function load(){
+  const id = getParam('id');
+  if(!id){
+    document.getElementById('main').innerHTML = '<div class="err">ID produk tidak ditemukan di URL.</div>';
+    return;
+  }
+  apiGet('produkDetail', { idInternal: id }).then(res => {
+    if(!res.ok){
+      document.getElementById('main').innerHTML = `<div class="err">${res.msg || 'Produk tidak ditemukan.'}</div>`;
+      return;
+    }
+    produk = res.data;
+    render();
+  }).catch(err => {
+    document.getElementById('main').innerHTML = `<div class="err">Gagal memuat produk. ${err}</div>`;
+  });
+}
+
+load();
+</script>
+</body>
+</html>
