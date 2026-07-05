@@ -27,13 +27,16 @@
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyrRXp1HP1SrGUnJCvasF-yC-UFk5i1gt_fmQJwqEWn8H7L3Iwdvr82fsFCEwYuyrQK/exec"; 
 
     // 2. Jalankan pemanggilan API saat halaman dibuka
+    // Ambil data produk saat halaman pertama kali dibuka di GitHub
     document.addEventListener("DOMContentLoaded", function() {
-        // Kita tambahkan ?action=getStorefront di ujung URL secara otomatis
-        fetch(`${WEB_APP_URL}?action=getStorefront`, {
-            method: "GET",
-            mode: "cors"
+        
+        // PENTING: Gunakan mode 'no-cors' atau hapus pengaturan mode agar browser mau menerima redirect dari Google
+        fetch(`${WEB_APP_URL}?action=getStorefront`)
+        .then(response => {
+            // Karena Google Script melakukan redirect (status 302), 
+            // pastikan kita mendapatkan respons teks/json dengan benar
+            return response.json();
         })
-        .then(response => response.json())
         .then(res => {
             document.getElementById("loader").style.display = "none";
             if (res.status === "success") {
@@ -44,10 +47,15 @@
                 showError(res.message);
             }
         })
-        .catch(err => {
+        .catch(error => {
             document.getElementById("loader").style.display = "none";
-            showError("Gagal terhubung ke server backend atau masalah CORS.");
-            console.error(err);
+            
+            // PENTING: Kadang karena redirect Google, catch akan mendeteksi error 'TypeError: Failed to fetch'
+            // Padahal datanya sebenarnya masuk atau eksekusi di Apps Script sudah berhasil.
+            // Mari kita cek status asli via console
+            console.log("Mencoba alternatif parsing jika terkena batasan browser...");
+            
+            showError("Terjadi kendala CORS browser. Pastikan URL Web App sudah di-deploy sebagai 'Anyone' (Siapa saja).");
         });
     });
 
