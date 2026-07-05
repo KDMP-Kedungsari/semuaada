@@ -181,9 +181,11 @@ function renderPagination(page, pages){
 }
 
 function openProduk(idInternal){
-  // Tahap berikutnya: arahkan ke halaman detail produk (masih di GAS,
-  // atau nanti dimigrasi juga). Untuk sekarang buka lewat exec URL asli.
-  window.open(SCRIPT_URL.replace('/exec','') + '/exec?page=produkDetail&id=' + encodeURIComponent(idInternal), '_blank');
+  // Detail produk sekarang juga sudah dimigrasi ke halaman statis
+  // (produkDetail.html) -- masih di domain GitHub Pages yang sama,
+  // jadi bebas banner Google. Baru saat klik "Beli Sekarang" di
+  // halaman detail, user diarahkan ke sistem checkout lama.
+  window.location.href = './produkDetail.html?id=' + encodeURIComponent(idInternal);
 }
 
 function resetAndLoad(){
