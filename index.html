@@ -718,7 +718,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height
 // ══════════════════════════════════════════════════════════
 //  STATE & SESSION
 // ══════════════════════════════════════════════════════════
-// ⚠️ GANTI dengan URL exec hasil deploy Code.gs Apti (samakan dengan file lain)
+// ⚠️ GANTI dengan URL exec hasil deploy Code.gs
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyokoCqfnvpszI3L4upfkEfh4etSilVgjcbpKS_fJXhBYTOVfoqD1SoedIgBzkGwA/exec";
 var _SCRIPT_URL = SCRIPT_URL; // dipertahankan supaya kode lama yang masih merujuk _SCRIPT_URL tetap jalan
 
@@ -1366,6 +1366,7 @@ function logoutAdmin(){
   ADM_TOKEN=''; ADM_NAMA=''; ADM_ROLE=''; ADM_HAK=''; ADM_EXPIRE=''; ADM_USERNAME='';
   closeBs('bsAkun');
   showToast('✅ Berhasil keluar dari panel admin');
+  document.getElementById('navAkunLbl').textContent='Akun';
 }
 function logoutCustomer(){
   if(CUST_TOKEN) apiPost('logoutCustomer', { custToken: CUST_TOKEN }).catch(function(){});
@@ -1672,7 +1673,40 @@ function doCekPesanan(){
   var email=document.getElementById('cekEmailPesanan').value.trim();
   var el=document.getElementById('cekPesananResult');
   if(!idP||!email){ el.innerHTML='<div style="color:var(--r);font-size:12px;padding:8px 0;">⚠️ ID Pesanan dan email wajib diisi.</div>'; return; }
-  el.innerHTML='<div style="text-align:center;padding:12px;font-size:12px;color:var(--abu);">🚧 Fitur cek status pesanan segera hadir di sini. Untuk sementara, cek lewat link yang dikirim ke email Anda saat checkout.</div>';
+  el.innerHTML='<div style="text-align:center;padding:12px;font-size:12px;color:var(--abu);">Mencari pesanan…</div>';
+  _cekIdPesanan=idP; _cekEmail=email; _buktiFoto=null; _buktiPreview='';
+  apiGet('cekPesanan', { idPesanan: idP, email: email }).then(function(r){
+      if(!r.ok){ el.innerHTML='<div style="color:var(--r);font-size:12px;padding:8px 0;">⚠️ '+_esc(r.msg)+'</div>'; return; }
+      var p=r.pesanan;
+      var st=String(p.STATUS_PESANAN||'').toLowerCase();
+      var stLabel={menunggu_bayar:'⏳ Menunggu Pembayaran',dibayar:'💳 Sudah Dibayar',diproses:'⚙️ Sedang Diproses',dikirim:'🚚 Sedang Dikirim',selesai:'✅ Selesai',dibatalkan:'❌ Dibatalkan'}[st]||st;
+      var stColor={menunggu_bayar:'#d97706',dibayar:'#1d4ed8',diproses:'#7c3aed',dikirim:'#0d9488',selesai:'#15803d',dibatalkan:'#dc2626'}[st]||'#374151';
+      var uploadHtml='';
+      if(st==='menunggu_bayar' && String(p.METODE_BAYAR||'').toLowerCase()==='transfer'){
+        uploadHtml=
+          '<div style="margin-top:10px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:10px 12px;font-size:11px;color:#92400e;line-height:1.6;">'+
+            '📋 Transfer ke rekening MahaMeru, lalu upload bukti di bawah.'+
+          '</div>'+
+          '<div class="up-area" id="upArea" onclick="document.getElementById(\'inputBuktiFoto\').click()">'+
+            '<div class="up-area-ico">📷</div>'+
+            '<div class="up-area-lbl">Upload Bukti Transfer</div>'+
+            '<div class="up-area-sub">JPG / PNG / PDF · Maks. 2MB</div>'+
+          '</div>'+
+          '<input type="file" id="inputBuktiFoto" style="display:none;" accept="image/jpeg,image/png,application/pdf" onchange="onBuktiSelSF(this)">'+
+          '<button class="btn-up-bukti" id="btnUpBukti" disabled onclick="doUploadBuktiSF()">📤 Kirim Bukti Transfer</button>';
+      }
+      el.innerHTML=
+        '<div style="background:var(--bg);border-radius:12px;padding:12px;margin-top:10px;">'+
+          '<div style="font-size:10px;color:var(--abu);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Hasil Pencarian</div>'+
+          '<div style="font-size:12px;font-weight:800;color:var(--h);margin-bottom:4px;">'+_esc(p.ID_PESANAN||'')+'</div>'+
+          '<div style="font-size:12px;color:var(--abu2);margin-bottom:4px;">Pemesan: <strong>'+_esc(p.NAMA_PEMESAN||'')+'</strong></div>'+
+          '<div style="font-size:12px;color:var(--abu2);margin-bottom:4px;">Total: <strong style="color:var(--or);">'+_esc(r.totalFmt||'')+'</strong></div>'+
+          '<div style="font-size:12px;margin-bottom:4px;">Metode: <strong>'+_esc(String(p.METODE_BAYAR||'').toUpperCase())+'</strong></div>'+
+          '<div style="font-size:12px;font-weight:800;color:'+stColor+';">'+stLabel+'</div>'+
+          uploadHtml+
+        '</div>';
+    })
+    .catch(function(e){ el.innerHTML='<div style="color:var(--r);font-size:12px;padding:8px 0;">⚠️ '+_esc((e&&e.message)||'Gagal terhubung.')+'</div>'; });
 }
 
 var _cekIdPesanan='', _cekEmail='', _buktiFoto=null, _buktiPreview='';
@@ -1695,7 +1729,20 @@ function onBuktiSelSF(inp){
 }
 
 function doUploadBuktiSF(){
-  _fiturBelumTersedia('Upload Bukti Transfer');
+  if(!_buktiFoto||!_buktiPreview){ showToast('⚠️ Pilih file bukti dulu'); return; }
+  var btn=document.getElementById('btnUpBukti');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Mengupload…';
+  var b64=_buktiPreview.split(',')[1];
+  apiPost('uploadBukti', {
+    idPesanan: _cekIdPesanan, base64Data: b64, mimeType: _buktiFoto.type,
+    namaFile: _buktiFoto.name, custToken: CUST_TOKEN||null
+  }).then(function(r){
+      btn.disabled=false; btn.innerHTML='📤 Kirim Bukti Transfer';
+      if(!r.ok){ showToast('⚠️ '+r.msg); return; }
+      showToast('✅ Bukti berhasil dikirim! Admin akan segera memverifikasi.');
+      doCekPesanan(); // refresh tampilan status
+    })
+    .catch(function(e){ btn.disabled=false; btn.innerHTML='📤 Kirim Bukti Transfer'; showToast('⚠️ '+((e&&e.message)||'Gagal mengupload.')); });
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1800,8 +1847,14 @@ function chatBackToList(){
 
 function loadAdminCSList(){
   document.getElementById('adminEmpty').style.display='block';
-  document.getElementById('adminEmpty').textContent='🚧 Fitur chat admin segera hadir di sini.';
-  document.getElementById('adminHint').textContent='';
+  document.getElementById('adminEmpty').textContent='Memuat daftar admin...';
+  document.getElementById('adminHint').textContent=CUST_TOKEN?'Pilih salah satu admin di bawah untuk mulai chat':'Anda belum login — pilih admin untuk chat via WhatsApp';
+  apiGet('adminCSList', {}).then(function(r){
+      if(!r.ok){ document.getElementById('adminEmpty').textContent='⚠️ '+r.msg; return; }
+      _chatAdminList=r.data||[];
+      renderAdminList();
+    })
+    .catch(function(e){ document.getElementById('adminEmpty').textContent='⚠️ '+((e&&e.message)||'Gagal memuat.'); });
 }
 function renderAdminList(){
   var wrap=document.getElementById('adminListWrap');
@@ -1849,7 +1902,17 @@ function pilihAdminChat(a){
   startChatPoll();
 }
 function loadChatHistory(forceScroll){
-  // Fitur chat belum dimigrasi -- lihat catatan di loadAdminCSList().
+  if(!_chatSelectedAdmin) return;
+  apiGet('chatHistory', { custToken: CUST_TOKEN, idAdmin: _chatSelectedAdmin.ID_USER }).then(function(r){
+      if(!r.ok) return;
+      var list=r.data||[];
+      if(!forceScroll && list.length===_lastChatMsgCount){ refreshChatBadge(); return; }
+      var adaPesanBaru = list.length!==_lastChatMsgCount;
+      _lastChatMsgCount=list.length;
+      renderChatThread(list, forceScroll || adaPesanBaru);
+      refreshChatBadge();
+    })
+    .catch(function(){});
 }
 function renderChatThread(list, scrollDown){
   var el=document.getElementById('chatThread');
@@ -1893,15 +1956,58 @@ function openImgViewer(url){
 }
 function closeImgViewer(){ document.getElementById('imgViewerBg').classList.remove('show'); }
 function kirimPesanChat(){
-  _fiturBelumTersedia('Chat Admin');
+  if(!_chatSelectedAdmin) return;
+  var inp=document.getElementById('chatInput');
+  var pesan=inp.value.trim();
+  if(_pendingFotoChat){
+    var foto=_pendingFotoChat; _pendingFotoChat=null;
+    document.getElementById('attachPreview').classList.remove('show');
+    inp.value='';
+    var btn=document.getElementById('chatSendBtn'); btn.disabled=true;
+    apiPost('kirimChatFoto', {
+      custToken: CUST_TOKEN, idAdmin: _chatSelectedAdmin.ID_USER,
+      base64Data: foto.base64, mimeType: foto.mime, caption: pesan
+    }).then(function(r){
+        btn.disabled=false;
+        if(!r.ok){ showToast('⚠️ '+r.msg); return; }
+        loadChatHistory(true);
+      })
+      .catch(function(e){ btn.disabled=false; showToast('⚠️ '+((e&&e.message)||'Gagal mengirim.')); });
+    return;
+  }
+  if(!pesan) return;
+  var btn=document.getElementById('chatSendBtn');
+  btn.disabled=true; inp.value='';
+  apiPost('kirimChat', { custToken: CUST_TOKEN, idAdmin: _chatSelectedAdmin.ID_USER, pesan: pesan }).then(function(r){
+      btn.disabled=false;
+      if(!r.ok){ showToast('⚠️ '+r.msg); inp.value=pesan; return; }
+      loadChatHistory(true);
+    })
+    .catch(function(e){ btn.disabled=false; showToast('⚠️ '+((e&&e.message)||'Gagal mengirim.')); inp.value=pesan; });
 }
 async function hapusPercakapanCustomer(){
-  _fiturBelumTersedia('Chat Admin');
+  if(!_chatSelectedAdmin) return;
+  var nama=_chatSelectedAdmin.NAMA||'admin ini';
+  var ok=await showConfirmModal('Hapus Percakapan?', 'Percakapan Anda dengan "'+nama+'" akan disembunyikan dari daftar chat Anda. Admin masih bisa melihat riwayatnya, dan percakapan akan muncul lagi kalau ada balasan baru.');
+  if(!ok) return;
+  apiPost('hapusChat', { custToken: CUST_TOKEN, idAdmin: _chatSelectedAdmin.ID_USER }).then(function(r){
+      if(!r.ok){ showToast('⚠️ '+r.msg); return; }
+      showToast('✅ '+r.msg);
+      chatBackToList();
+    })
+    .catch(function(e){ showToast('⚠️ '+((e&&e.message)||'Gagal menghapus.')); });
 }
-function startChatPoll(){ /* fitur chat belum dimigrasi -- tidak perlu polling */ }
+function startChatPoll(){ stopChatPoll(); _chatPollTimer=setInterval(function(){ loadChatHistory(false); },6000); }
 function stopChatPoll(){ clearInterval(_chatPollTimer); _chatPollTimer=null; }
 function refreshChatBadge(){
-  document.getElementById('chatBadge').classList.remove('show');
+  if(!CUST_TOKEN){ document.getElementById('chatBadge').classList.remove('show'); return; }
+  apiGet('chatUnread', { custToken: CUST_TOKEN }).then(function(r){
+      var n=(r&&r.unread)||0;
+      var b=document.getElementById('chatBadge');
+      b.textContent=n>9?'9+':n;
+      b.classList.toggle('show', n>0);
+    })
+    .catch(function(){});
 }
 
 // ── Modal konfirmasi generik (Promise-based) ──
