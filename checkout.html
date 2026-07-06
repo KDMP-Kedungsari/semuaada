@@ -208,7 +208,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height
 
 <script>
 // ⚠️ GANTI dengan URL exec hasil deploy Code.gs Apti (samakan dengan file lain)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycrHqyUE3aOR_E4Fsxxq17BLyIPC-uwelxrkX_1FCMUDRsEXH2tT42TNS787o9Ax8/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyokoCqfnvpszI3L4upfkEfh4etSilVgjcbpKS_fJXhBYTOVfoqD1SoedIgBzkGwA/exec";
 
 // Halaman ini murni statis di GitHub Pages (bukan dirender GAS), jadi
 // window.location.search normal apa adanya -- tidak perlu trik SERVER_PARAMS
@@ -309,6 +309,21 @@ apiGet('ppnInfo', {}).then(function(r){
     document.getElementById('mbEmail').textContent=CUST_EMAIL||'';
     document.getElementById('fNama').value=CUST_NAMA||'';
     document.getElementById('fEmail').value=CUST_EMAIL||'';
+  }
+
+  // Ambil profil lengkap (HP, alamat, kota, provinsi, kodepos) supaya
+  // customer yang sudah login tidak perlu isi ulang data yang sama tiap checkout.
+  if(CUST_TOKEN){
+    apiGet('customerProfile', { custToken: CUST_TOKEN }).then(function(r){
+        if(!r||!r.ok||!r.data) return;
+        var d=r.data;
+        if(d.HP)       document.getElementById('fHp').value       = String(d.HP);
+        if(d.ALAMAT)   document.getElementById('fAlamat').value   = d.ALAMAT;
+        if(d.KOTA)     document.getElementById('fKota').value     = d.KOTA;
+        if(d.PROVINSI) document.getElementById('fProvinsi').value = d.PROVINSI;
+        if(d.KODEPOS)  document.getElementById('fKodepos').value  = String(d.KODEPOS);
+      })
+      .catch(function(){ /* diamkan -- form tetap bisa diisi manual */ });
   }
 
   renderVoucherZone();
