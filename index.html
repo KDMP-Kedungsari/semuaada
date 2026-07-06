@@ -616,8 +616,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height
       <button class="bs-close" onclick="closeBs('bsCekPesanan')">✕</button>
     </div>
     <div style="font-size:12px;color:var(--abu);margin-bottom:12px;line-height:1.6;">Masukkan ID Pesanan dan email yang digunakan saat checkout.</div>
-    <input class="bs-pesanan-input" type="text" id="cekIdPesanan" placeholder="ID Pesanan (contoh: ORD-ABC123)">
-    <input class="bs-pesanan-input" type="email" id="cekEmailPesanan" placeholder="Email pemesan">
+    <input class="bs-pesanan-input" type="text" id="cekIdPesanan" placeholder="ID Pesanan (contoh: ORD-ABC123)" autocomplete="off" name="cekid_mm">
+    <input class="bs-pesanan-input" type="email" id="cekEmailPesanan" placeholder="Email pemesan" autocomplete="off" name="cekemail_mm">
     <div id="cekPesananResult"></div>
     <button class="btn-d-cart" style="width:100%;margin-top:4px;" onclick="doCekPesanan()">🔍 Cek Pesanan</button>
   </div>
@@ -642,13 +642,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height
       <div class="pf-group">
         <label class="pf-label">Nama Lengkap <span class="pf-req">*</span></label>
         <div class="pf-iw"><span class="pf-ico">📋</span>
-          <input class="pf-inp" type="text" id="pfNama" placeholder="Nama lengkap">
+          <input class="pf-inp" type="text" id="pfNama" placeholder="Nama lengkap" autocomplete="off" name="pfnama_mm">
         </div>
       </div>
       <div class="pf-group">
         <label class="pf-label">No. HP</label>
         <div class="pf-iw"><span class="pf-ico">📞</span>
-          <input class="pf-inp" type="tel" id="pfHp" placeholder="08xxxxxxxxxx" inputmode="tel">
+          <input class="pf-inp" type="tel" id="pfHp" placeholder="08xxxxxxxxxx" inputmode="tel" autocomplete="off" name="pfhp_mm">
         </div>
       </div>
       <div class="pf-group">
@@ -658,19 +658,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height
       <div class="pf-group">
         <label class="pf-label">Kota / Kabupaten</label>
         <div class="pf-iw"><span class="pf-ico">🏙️</span>
-          <input class="pf-inp" type="text" id="pfKota" placeholder="Kota">
+          <input class="pf-inp" type="text" id="pfKota" placeholder="Kota" autocomplete="off" name="pfkota_mm">
         </div>
       </div>
       <div class="pf-group">
         <label class="pf-label">Provinsi</label>
         <div class="pf-iw"><span class="pf-ico">🗺️</span>
-          <input class="pf-inp" type="text" id="pfProvinsi" placeholder="Provinsi">
+          <input class="pf-inp" type="text" id="pfProvinsi" placeholder="Provinsi" autocomplete="off" name="pfprovinsi_mm">
         </div>
       </div>
       <div class="pf-group">
         <label class="pf-label">Kode Pos</label>
         <div class="pf-iw"><span class="pf-ico">📮</span>
-          <input class="pf-inp" type="text" id="pfKodepos" placeholder="55555" inputmode="numeric">
+          <input class="pf-inp" type="text" id="pfKodepos" placeholder="55555" inputmode="numeric" autocomplete="off" name="pfkodepos_mm">
         </div>
       </div>
       <!-- Ganti Password (opsional) -->
@@ -679,7 +679,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height
         <label class="pf-label">Password Lama</label>
         <div class="pf-iw">
           <span class="pf-ico">🔐</span>
-          <input class="pf-inp" type="password" id="pfPwLama" placeholder="Isi jika ingin ganti password">
+          <input class="pf-inp" type="password" id="pfPwLama" placeholder="Isi jika ingin ganti password" autocomplete="off" name="pfpwlama_mm">
           <button class="pf-eye" onclick="pfToggleEye('pfPwLama','pfEye1')" id="pfEye1">👁</button>
         </div>
       </div>
@@ -687,7 +687,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height
         <label class="pf-label">Password Baru</label>
         <div class="pf-iw">
           <span class="pf-ico">🔑</span>
-          <input class="pf-inp" type="password" id="pfPwBaru" placeholder="Min. 6 karakter">
+          <input class="pf-inp" type="password" id="pfPwBaru" placeholder="Min. 6 karakter" autocomplete="off" name="pfpwbaru_mm">
           <button class="pf-eye" onclick="pfToggleEye('pfPwBaru','pfEye2')" id="pfEye2">👁</button>
         </div>
         <div class="pf-hint">Kosongkan kedua field password jika tidak ingin menggantinya.</div>
@@ -1563,7 +1563,7 @@ function renderVoucherZone(){
     '</div>';
   } else if(!CUST_TOKEN){
     el.innerHTML='<div class="promo-input-row">'+
-      '<input type="text" id="inputKodeVoucher" placeholder="Punya kode voucher?">'+
+      '<input type="text" id="inputKodeVoucher" placeholder="Punya kode voucher?" autocomplete="off" name="svoucher_mm">'+
       '<button onclick="terapkanVoucher()" id="btnTerapkanVoucher">Pakai</button>'+
     '</div>';
   } else {
