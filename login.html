@@ -82,7 +82,15 @@ input:focus{outline:none;border-color:var(--h);box-shadow:0 0 0 3px rgba(21,101,
 .rd-dot:nth-child(2){animation-delay:.2s;}
 .rd-dot:nth-child(3){animation-delay:.4s;}
 
-.spin{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+.toast-wrap{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:99999;max-width:360px;width:calc(100% - 32px);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;}
+.toast-wrap.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+.toast{background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,.18);display:flex;gap:11px;align-items:flex-start;border-left:4px solid var(--h);}
+.toast.warn{border-left-color:var(--amber);}
+.toast-ico{font-size:20px;flex-shrink:0;line-height:1;margin-top:1px;}
+.toast-body{flex:1;min-width:0;}
+.toast-title{font-size:13px;font-weight:800;color:#1f2937;margin-bottom:2px;}
+.toast-msg{font-size:12px;color:#6b7280;line-height:1.5;}
+.toast-close{background:none;border:none;font-size:15px;color:#9ca3af;cursor:pointer;padding:2px;flex-shrink:0;}
 .footer{text-align:center;padding:16px 0 4px;font-size:11px;color:#9ca3af;}
 
 @keyframes popIn{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
@@ -129,13 +137,13 @@ input:focus{outline:none;border-color:var(--h);box-shadow:0 0 0 3px rgba(21,101,
           <label>Email / Username <span class="req">*</span></label>
           <div class="iw"><span class="ico">👤</span>
             <input type="text" id="loginId" placeholder="email@anda.com atau username"
-              inputmode="email" autocapitalize="none" autocomplete="username">
+              inputmode="email" autocapitalize="none" autocomplete="off" name="loginid_mm">
           </div>
         </div>
         <div class="form-group">
           <label>Password <span class="req">*</span></label>
           <div class="iw"><span class="ico">🔒</span>
-            <input type="password" id="loginPass" placeholder="Password Anda" autocomplete="current-password">
+            <input type="password" id="loginPass" placeholder="Password Anda" autocomplete="off" name="loginpass_mm">
             <button class="eye" onclick="toggleEye('loginPass','eL1')" id="eL1">👁</button>
           </div>
         </div>
@@ -151,32 +159,32 @@ input:focus{outline:none;border-color:var(--h);box-shadow:0 0 0 3px rgba(21,101,
         <div class="form-group">
           <label>Nama Lengkap <span class="req">*</span></label>
           <div class="iw"><span class="ico">👤</span>
-            <input type="text" id="rdNama" placeholder="Nama lengkap Anda">
+            <input type="text" id="rdNama" placeholder="Nama lengkap Anda" autocomplete="off" name="rdnama_mm">
           </div>
         </div>
         <div class="form-group">
           <label>Email <span class="req">*</span></label>
           <div class="iw"><span class="ico">📧</span>
-            <input type="email" id="rdEmail" placeholder="email@anda.com" inputmode="email">
+            <input type="email" id="rdEmail" placeholder="email@anda.com" inputmode="email" autocomplete="off" name="rdemail_mm">
           </div>
         </div>
         <div class="form-group">
           <label>No. HP</label>
           <div class="iw"><span class="ico">📞</span>
-            <input type="tel" id="rdHp" placeholder="08xxxxxxxxxx" inputmode="tel">
+            <input type="tel" id="rdHp" placeholder="08xxxxxxxxxx" inputmode="tel" autocomplete="off" name="rdhp_mm">
           </div>
         </div>
         <div class="form-group">
           <label>Password <span class="req">*</span></label>
           <div class="iw"><span class="ico">🔒</span>
-            <input type="password" id="rdPass" placeholder="Min. 6 karakter">
+            <input type="password" id="rdPass" placeholder="Min. 6 karakter" autocomplete="off" name="rdpass_mm">
             <button class="eye" onclick="toggleEye('rdPass','eR1')" id="eR1">👁</button>
           </div>
         </div>
         <div class="form-group">
           <label>Konfirmasi Password <span class="req">*</span></label>
           <div class="iw"><span class="ico">✅</span>
-            <input type="password" id="rdPassK" placeholder="Ulangi password">
+            <input type="password" id="rdPassK" placeholder="Ulangi password" autocomplete="off" name="rdpassk_mm">
             <button class="eye" onclick="toggleEye('rdPassK','eR2')" id="eR2">👁</button>
           </div>
         </div>
@@ -197,9 +205,21 @@ input:focus{outline:none;border-color:var(--h);box-shadow:0 0 0 3px rgba(21,101,
   <div class="rd-dots"><div class="rd-dot"></div><div class="rd-dot"></div><div class="rd-dot"></div></div>
 </div>
 
+<!-- TOAST NOTIFIKASI -->
+<div class="toast-wrap" id="toastWrap">
+  <div class="toast" id="toastBox">
+    <div class="toast-ico" id="toastIco">ℹ️</div>
+    <div class="toast-body">
+      <div class="toast-title" id="toastTitle">Info</div>
+      <div class="toast-msg" id="toastMsg"></div>
+    </div>
+    <button class="toast-close" onclick="hideToast()">✕</button>
+  </div>
+</div>
+
 <script>
-// ⚠️ GANTI dengan URL exec hasil deploy Code.gs Apti (samakan dengan file lain)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyokoCqfnvpszI3L4upfkEfh4etSilVgjcbpKS_fJXhBYTOVfoqD1SoedIgBzkGwA/exec";
+// ⚠️ GANTI dengan URL exec hasil deploy Code.gs
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0mYg90WjbqVLs-bpCkUdPxKf2Xd7kpyW1koy79DVX5UM1_3PrIDb2fxmODoKwIQg/exec";
 
 function apiPost(action, body){
   var url = new URL(SCRIPT_URL);
@@ -324,13 +344,26 @@ function belanjaGuest(){
   setTimeout(function(){ _navTo('./index.html'); }, 400);
 }
 
+function showToast(title, msg, type){
+  document.getElementById('toastIco').textContent = type==='warn' ? '⚠️' : 'ℹ️';
+  document.getElementById('toastBox').className = 'toast'+(type==='warn'?' warn':'');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastMsg').textContent = msg;
+  document.getElementById('toastWrap').classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(hideToast, 5000);
+}
+function hideToast(){ document.getElementById('toastWrap').classList.remove('show'); }
+
 // ── LUPA PASSWORD ──
 function goLupa(){
   var id = document.getElementById('loginId').value.trim();
-  if(id && !_isEmail(id)){
-    _navTo('./lupaPassword.html?username='+encodeURIComponent(id));
+  if(!id){
+    showToast('Isi Email/Username Dulu', 'Ketik email atau username Anda di kolom di atas, lalu klik "Lupa password?" lagi.', 'warn');
+  } else if(_isEmail(id)){
+    _navTo('./lupaPasswordCustomer.html?email='+encodeURIComponent(id));
   } else {
-    alert('Fitur lupa password customer segera hadir. Hubungi Admin untuk bantuan.');
+    _navTo('./lupaPassword.html?username='+encodeURIComponent(id));
   }
 }
 
