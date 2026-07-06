@@ -118,7 +118,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);display:fl
 <div class="chat-input-wrap" id="chatInputWrap">
   <button class="btn-attach" onclick="document.getElementById('fileInput').click()">📎</button>
   <input type="file" id="fileInput" accept="image/*" style="display:none;" onchange="pilihLampiran(this)">
-  <input type="text" id="chatInput" placeholder="Tulis balasan..." maxlength="1000" onkeydown="if(event.key==='Enter')kirimBalasan()">
+  <input type="text" id="chatInput" placeholder="Tulis balasan..." maxlength="1000" autocomplete="off" name="mcinput_mm" onkeydown="if(event.key==='Enter')kirimBalasan()">
   <button class="chat-send" id="chatSendBtn" onclick="kirimBalasan()">➤</button>
 </div>
 
