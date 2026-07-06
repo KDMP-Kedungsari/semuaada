@@ -144,19 +144,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height
 
   <div class="card">
     <div class="card-title">👤 Data Pemesan</div>
-    <div class="fg"><label>Nama Lengkap <span class="req">*</span></label><input type="text" id="fNama" placeholder="Nama penerima"></div>
-    <div class="fg"><label>Email <span class="req">*</span></label><input type="email" id="fEmail" placeholder="email@anda.com" inputmode="email"></div>
-    <div class="fg"><label>No. HP / WhatsApp</label><input type="text" id="fHp" placeholder="08xxxxxxxxxx" inputmode="tel" autocomplete="tel"></div>
+    <div class="fg"><label>Nama Lengkap <span class="req">*</span></label><input type="text" id="fNama" placeholder="Nama penerima" autocomplete="off" name="fnama_mm"></div>
+    <div class="fg"><label>Email <span class="req">*</span></label><input type="email" id="fEmail" placeholder="email@anda.com" inputmode="email" autocomplete="off" name="femail_mm"></div>
+    <div class="fg"><label>No. HP / WhatsApp</label><input type="text" id="fHp" placeholder="08xxxxxxxxxx" inputmode="tel" autocomplete="off" name="fhp_mm"></div>
   </div>
 
   <div class="card" id="cardAlamat">
     <div class="card-title">📍 Alamat Pengiriman</div>
-    <div class="fg"><label>Alamat Lengkap <span class="req">*</span></label><textarea id="fAlamat" placeholder="Jl. Contoh No. 123, RT/RW, Kelurahan, Kecamatan" rows="3"></textarea></div>
+    <div class="fg"><label>Alamat Lengkap <span class="req">*</span></label><textarea id="fAlamat" placeholder="Jl. Contoh No. 123, RT/RW, Kelurahan, Kecamatan" rows="3" autocomplete="off" name="falamat_mm"></textarea></div>
     <div class="row2">
-      <div class="fg"><label>Kota</label><input type="text" id="fKota" placeholder="Kota / Kabupaten"></div>
-      <div class="fg"><label>Provinsi</label><input type="text" id="fProvinsi" placeholder="Provinsi"></div>
+      <div class="fg"><label>Kota</label><input type="text" id="fKota" placeholder="Kota / Kabupaten" autocomplete="off" name="fkota_mm"></div>
+      <div class="fg"><label>Provinsi</label><input type="text" id="fProvinsi" placeholder="Provinsi" autocomplete="off" name="fprovinsi_mm"></div>
     </div>
-    <div class="fg"><label>Kode Pos</label><input type="text" id="fKodepos" placeholder="12345" inputmode="numeric" maxlength="6"></div>
+    <div class="fg"><label>Kode Pos</label><input type="text" id="fKodepos" placeholder="12345" inputmode="numeric" maxlength="6" autocomplete="off" name="fkodepos_mm"></div>
   </div>
 
   <div class="card">
@@ -188,7 +188,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);min-height
 
   <div class="card">
     <div class="card-title">📝 Catatan (Opsional)</div>
-    <div class="fg"><textarea id="fCatatan" placeholder="Catatan untuk penjual: warna, ukuran spesifik, waktu pengiriman, dll." rows="3"></textarea></div>
+    <div class="fg"><textarea id="fCatatan" placeholder="Catatan untuk penjual: warna, ukuran spesifik, waktu pengiriman, dll." rows="3" autocomplete="off" name="fcatatan_mm"></textarea></div>
   </div>
 </div>
 
@@ -408,7 +408,7 @@ function renderVoucherZone(){
     '</div>';
   } else if(!CUST_TOKEN){
     el.innerHTML='<div class="promo-input-row">'+
-      '<input type="text" id="inputKodeVoucher" placeholder="Punya kode voucher?">'+
+      '<input type="text" id="inputKodeVoucher" placeholder="Punya kode voucher?" autocomplete="off" name="fvoucher_mm">'+
       '<button onclick="terapkanVoucher()" id="btnTerapkanVoucher">Pakai</button>'+
     '</div>';
   } else {
